@@ -891,7 +891,7 @@ function stopVideo() {
 
     // Llamada a tu backend en Colab
     try {
-      const res = await fetch('https://28a5-104-196-4-227.ngrok-free.app/api/chat', {
+      const res = await fetch('http://localhost:5000/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ prompt: userText })
