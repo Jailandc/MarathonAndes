@@ -329,13 +329,36 @@
 			</div>
 			<!-- Boton de activación!-->
 			<div class="row mt-2">
-				<div class="col-12 text-center">
+				<div class="col-10 text-center">
 				  <button id="btnIniciar" class="btn btn-success">INICIAR CUENTA REGRESIVA</button>
+				</div>
+				<div class="col-2 text-center">
+					<!-- Botón flotante para abrir el chatbot -->
+					<button id="openChatBtn" class="btn btn-success rounded-circle shadow">
+  					💬
+					</button>
 				</div>
 			</div>
 			<!-- Fin de boton de activación!-->
 		</div>
 	</div>
+</div>
+
+<!-- Ventana del Chatbot -->
+<div id="chatContainer" class="card shadow-lg" style="display: none; position: fixed; bottom: 90px; right: 20px; width: 350px; height: 450px; z-index: 999;">
+  <div class="card-header bg-success text-white">
+    Chat de ayuda
+    <button type="button" class="btn-close float-end btn-close-white" aria-label="Cerrar" onclick="toggleChat()"></button>
+  </div>
+  <div class="card-body d-flex flex-column" style="overflow-y: auto;" id="chatMessages">
+    <div class="text-muted text-center">¿En qué puedo ayudarte?</div>
+  </div>
+  <div class="card-footer">
+    <form id="chatForm" class="input-group">
+      <input id="userInput" type="text" class="form-control" placeholder="Escribe tu pregunta..." required />
+      <button class="btn btn-success" type="submit">Enviar</button>
+    </form>
+  </div>
 </div>
 
 <div class="container-fluid">
@@ -838,6 +861,58 @@ function stopVideo() {
     // Ocultar el botón
     this.style.display = 'none';
 });
+
+// Chat OpenIA
+  const chatContainer = document.getElementById('chatContainer');
+  const openChatBtn = document.getElementById('openChatBtn');
+  const chatMessages = document.getElementById('chatMessages');
+  const chatForm = document.getElementById('chatForm');
+  const userInput = document.getElementById('userInput');
+
+  openChatBtn.addEventListener('click', () => {
+    chatContainer.style.display = chatContainer.style.display === 'none' ? 'block' : 'none';
+  });
+
+  function toggleChat() {
+    chatContainer.style.display = 'none';
+  }
+
+  chatForm.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const userText = userInput.value.trim();
+    if (!userText) return;
+
+    // Muestra el mensaje del usuario
+    const userMsg = document.createElement('div');
+    userMsg.className = 'text-end my-1';
+    userMsg.innerHTML = `<span class="badge bg-primary">${userText}</span>`;
+    chatMessages.appendChild(userMsg);
+    userInput.value = '';
+
+    // Llamada a tu backend en Colab
+    try {
+      const res = await fetch('https://28a5-104-196-4-227.ngrok-free.app/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ prompt: userText })
+      });
+      const data = await res.json();
+
+      const botMsg = document.createElement('div');
+      botMsg.className = 'text-start my-1';
+      botMsg.innerHTML = `<span class="badge bg-secondary">${data.response}</span>`;
+      chatMessages.appendChild(botMsg);
+    } catch (err) {
+      const errorMsg = document.createElement('div');
+      errorMsg.className = 'text-start my-1 text-danger';
+      errorMsg.textContent = 'Error al contactar el servidor.';
+      chatMessages.appendChild(errorMsg);
+    }
+
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+  });
+
+///////////////////////////////////////////////////////////////////
 </script>
 
 	<footer>
